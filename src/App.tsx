@@ -10,10 +10,15 @@ import {
 } from 'react-router-dom'
 import {
   getFirstGenerationPokemon,
+  getPokemonDetail,
+  normalizePokemon,
   type Pokemon,
   type PokemonTypeName,
 } from './api/pokemon'
 import './App.css'
+
+const FIRST_GENERATION_MIN = 1
+const FIRST_GENERATION_MAX = 151
 
 const routes = {
   list: '/',
@@ -23,6 +28,8 @@ const routes = {
 
 let pokemonCache: Pokemon[] | null = null
 let pokemonRequest: Promise<Pokemon[]> | null = null
+const pokemonDetailCache = new Map<number, Pokemon>()
+const pokemonDetailRequests = new Map<number, Promise<Pokemon>>()
 
 function loadPokemon() {
   if (pokemonCache) {
@@ -31,10 +38,46 @@ function loadPokemon() {
 
   pokemonRequest ??= getFirstGenerationPokemon().then((pokemon) => {
     pokemonCache = pokemon
+    pokemon.forEach((entry) => pokemonDetailCache.set(entry.id, entry))
+
     return pokemon
   })
 
   return pokemonRequest
+}
+
+function loadPokemonById(id: number) {
+  const cachedPokemon =
+    pokemonDetailCache.get(id) ?? pokemonCache?.find((entry) => entry.id === id)
+
+  if (cachedPokemon) {
+    pokemonDetailCache.set(id, cachedPokemon)
+    return Promise.resolve(cachedPokemon)
+  }
+
+  const activeRequest = pokemonDetailRequests.get(id)
+
+  if (activeRequest) {
+    return activeRequest
+  }
+
+  const request = getPokemonDetail(id)
+    .then((detail) => {
+      const pokemon = normalizePokemon(detail)
+
+      pokemonDetailCache.set(pokemon.id, pokemon)
+      pokemonDetailRequests.delete(id)
+
+      return pokemon
+    })
+    .catch((error: unknown) => {
+      pokemonDetailRequests.delete(id)
+      throw error
+    })
+
+  pokemonDetailRequests.set(id, request)
+
+  return request
 }
 
 function App() {
@@ -323,11 +366,16 @@ function PokemonGalleryPage() {
 }
 
 function PokemonDetailPage() {
-  const { pokemon, status, error } = usePokemonIndex()
   const { pokemonId } = useParams()
-  const selectedPokemon = pokemon.find(
-    ({ id }) => id.toString() === pokemonId?.trim(),
-  )
+  const routePokemonId = getRoutePokemonId(pokemonId)
+  const { pokemon: selectedPokemon, status, error } =
+    usePokemonDetail(routePokemonId)
+  const previousId = routePokemonId
+    ? wrapPokemonId(routePokemonId - 1)
+    : FIRST_GENERATION_MAX
+  const nextId = routePokemonId
+    ? wrapPokemonId(routePokemonId + 1)
+    : FIRST_GENERATION_MIN
 
   return (
     <section className="browser-view" aria-labelledby="detail-heading">
@@ -339,9 +387,20 @@ function PokemonDetailPage() {
             </div>
 
             <div className="detail-panel">
-              <Link className="text-link" to={routes.list}>
-                Back to list
-              </Link>
+              <nav className="detail-nav" aria-label="Pokemon detail navigation">
+                <Link className="text-link" to={routes.list}>
+                  Back to list
+                </Link>
+                <div className="detail-step-links">
+                  <Link to={routes.detail(previousId)}>
+                    Previous #{previousId.toString().padStart(3, '0')}
+                  </Link>
+                  <Link to={routes.detail(nextId)}>
+                    Next #{nextId.toString().padStart(3, '0')}
+                  </Link>
+                </div>
+              </nav>
+
               <p className="eyebrow">#{selectedPokemon.dexNumber}</p>
               <h2 id="detail-heading">{selectedPokemon.displayName}</h2>
 
@@ -481,6 +540,12 @@ function NotFoundDetail({ pokemonId }: { pokemonId?: string }) {
 type LoadStatus = 'loading' | 'loaded' | 'error'
 type SortKey = 'number' | 'name' | 'height' | 'weight'
 type SortDirection = 'asc' | 'desc'
+type PokemonDetailState = {
+  error: string | null
+  pokemon: Pokemon | null
+  pokemonId: number
+  status: Exclude<LoadStatus, 'loading'>
+}
 
 function usePokemonIndex() {
   const [pokemon, setPokemon] = useState<Pokemon[]>(pokemonCache ?? [])
@@ -516,6 +581,74 @@ function usePokemonIndex() {
   }, [])
 
   return { pokemon, status, error }
+}
+
+function usePokemonDetail(pokemonId: number | null) {
+  const cachedPokemon =
+    pokemonId === null
+      ? null
+      : pokemonDetailCache.get(pokemonId) ??
+        pokemonCache?.find((entry) => entry.id === pokemonId) ??
+        null
+  const [detailState, setDetailState] = useState<PokemonDetailState | null>(
+    null,
+  )
+
+  useEffect(() => {
+    if (pokemonId === null || cachedPokemon) {
+      return
+    }
+
+    let isMounted = true
+
+    loadPokemonById(pokemonId)
+      .then((loadedPokemon) => {
+        if (!isMounted) {
+          return
+        }
+
+        setDetailState({
+          error: null,
+          pokemon: loadedPokemon,
+          pokemonId,
+          status: 'loaded',
+        })
+      })
+      .catch(() => {
+        if (!isMounted) {
+          return
+        }
+
+        setDetailState({
+          error: 'This Pokemon could not be loaded. Check the route and try again.',
+          pokemon: null,
+          pokemonId,
+          status: 'error',
+        })
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [cachedPokemon, pokemonId])
+
+  if (pokemonId === null) {
+    return { error: null, pokemon: null, status: 'loaded' as LoadStatus }
+  }
+
+  if (cachedPokemon) {
+    return { error: null, pokemon: cachedPokemon, status: 'loaded' as LoadStatus }
+  }
+
+  if (detailState?.pokemonId === pokemonId) {
+    return {
+      error: detailState.error,
+      pokemon: detailState.pokemon,
+      status: detailState.status as LoadStatus,
+    }
+  }
+
+  return { error: null, pokemon: null, status: 'loading' as LoadStatus }
 }
 
 function filterPokemon(pokemon: Pokemon[], query: string, type: string) {
@@ -609,6 +742,32 @@ function getSelectedTypes(value: string | null) {
   return value
     .split(',')
     .filter((type): type is PokemonTypeName => isPokemonTypeName(type))
+}
+
+function getRoutePokemonId(value?: string) {
+  const parsedId = Number(value?.trim())
+
+  if (
+    Number.isInteger(parsedId) &&
+    parsedId >= FIRST_GENERATION_MIN &&
+    parsedId <= FIRST_GENERATION_MAX
+  ) {
+    return parsedId
+  }
+
+  return null
+}
+
+function wrapPokemonId(id: number) {
+  if (id < FIRST_GENERATION_MIN) {
+    return FIRST_GENERATION_MAX
+  }
+
+  if (id > FIRST_GENERATION_MAX) {
+    return FIRST_GENERATION_MIN
+  }
+
+  return id
 }
 
 function getTypeOptions(pokemon: Pokemon[]) {

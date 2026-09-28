@@ -72,6 +72,7 @@
 
 .route-tabs a:focus-visible,
 .text-link:focus-visible,
+.detail-step-links a:focus-visible,
 .pokemon-card:focus-visible,
 .gallery-card:focus-visible,
 input:focus-visible,
@@ -463,6 +464,37 @@ select {
   text-align: left;
 }
 
+.detail-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.detail-step-links {
+  display: flex;
+  gap: 8px;
+}
+
+.detail-step-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 2px solid var(--ink);
+  border-radius: 7px;
+  background: var(--panel);
+  color: var(--ink);
+  font: 800 12px/1 var(--utility);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.detail-step-links a:hover {
+  background: var(--yellow);
+}
+
 .detail-panel .type-badges {
   justify-content: flex-start;
   margin: 18px 0 24px;
@@ -651,6 +683,12 @@ meter {
 
   .detail-layout {
     grid-template-columns: 1fr;
+  }
+
+  .detail-nav,
+  .detail-step-links {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .detail-art {
