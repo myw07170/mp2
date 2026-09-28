@@ -24,7 +24,7 @@
 .state-kicker {
   margin: 0;
   color: var(--accent);
-  font: 800 11px/1 var(--utility);
+  font: 800 12px/1 var(--utility);
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -120,14 +120,14 @@ select:focus-visible,
   display: grid;
   gap: 5px;
   color: var(--muted);
-  font: 800 11px/1 var(--utility);
+  font: 800 12px/1 var(--utility);
   text-align: left;
   text-transform: uppercase;
 }
 
 input,
 select {
-  min-height: 38px;
+  min-height: 40px;
   border: 1px solid var(--line-strong);
   border-radius: 6px;
   background: #fff;
@@ -142,7 +142,11 @@ input {
 
 select {
   min-width: 132px;
-  padding: 0 32px 0 10px;
+  padding: 0 36px 0 10px;
+  background:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%) calc(100% - 17px) 50% / 6px 6px no-repeat,
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%) calc(100% - 11px) 50% / 6px 6px no-repeat,
+    #fff;
 }
 
 .sort-direction {
@@ -159,14 +163,14 @@ select {
   grid-column: 1 / -1;
   margin-bottom: 5px;
   color: var(--muted);
-  font: 800 11px/1 var(--utility);
+  font: 800 12px/1 var(--utility);
   text-align: left;
   text-transform: uppercase;
 }
 
 .sort-direction button,
 .clear-filters {
-  min-height: 38px;
+  min-height: 40px;
   border: 1px solid var(--line-strong);
   border-radius: 6px;
   background: #fff;
@@ -288,7 +292,7 @@ select {
 .pokemon-card-facts dt,
 .detail-facts dt {
   color: var(--muted);
-  font: 800 10px/1 var(--utility);
+  font: 800 12px/1 var(--utility);
   text-transform: uppercase;
 }
 
@@ -311,12 +315,12 @@ select {
   align-items: center;
   justify-content: center;
   min-width: 58px;
-  padding: 5px 7px;
+  padding: 6px 8px;
   border: 1px solid color-mix(in srgb, currentColor 48%, #0000);
   border-radius: 999px;
   background: color-mix(in srgb, currentColor 14%, #fff);
   color: var(--type-color, var(--ink));
-  font: 800 10px/1 var(--utility);
+  font: 800 12px/1 var(--utility);
 }
 
 .gallery-controls {
@@ -333,7 +337,7 @@ select {
 .type-filter-group legend {
   padding: 0 5px;
   color: var(--muted);
-  font: 800 11px/1 var(--utility);
+  font: 800 12px/1 var(--utility);
   text-transform: uppercase;
 }
 
@@ -364,14 +368,14 @@ select {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 30px;
-  min-width: 70px;
-  padding: 0 10px;
+  min-height: 36px;
+  min-width: 76px;
+  padding: 0 12px;
   border: 1px solid color-mix(in srgb, currentColor 44%, #0000);
   border-radius: 999px;
   background: #fff;
   color: currentColor;
-  font: 800 11px/1 var(--utility);
+  font: 800 12px/1 var(--utility);
   transition:
     background 160ms ease,
     box-shadow 160ms ease;
@@ -393,7 +397,7 @@ select {
 }
 
 .clear-filters {
-  min-height: 32px;
+  min-height: 38px;
   padding: 0 10px;
 }
 
@@ -433,7 +437,7 @@ select {
 
 .gallery-card small {
   color: var(--muted);
-  font: 800 11px/1 var(--utility);
+  font: 800 12px/1 var(--utility);
 }
 
 .gallery-card .type-badges {
@@ -488,13 +492,13 @@ select {
 .detail-step-links a {
   display: inline-flex;
   align-items: center;
-  min-height: 32px;
-  padding: 0 10px;
+  min-height: 36px;
+  padding: 0 12px;
   border: 1px solid var(--line-strong);
   border-radius: 6px;
   background: var(--surface-muted);
   color: var(--ink);
-  font: 800 11px/1 var(--utility);
+  font: 800 12px/1 var(--utility);
   text-decoration: none;
   text-transform: uppercase;
 }
