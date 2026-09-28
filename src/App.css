@@ -279,30 +279,137 @@ select {
 
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 14px;
+}
+
+.gallery-controls {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.type-filter-group {
+  margin: 0;
+  padding: 16px;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.type-filter-group legend {
+  padding: 0 6px;
+  color: var(--muted);
+  font: 800 12px/1 var(--utility);
+  text-transform: uppercase;
+}
+
+.type-filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.type-filter-chip {
+  position: relative;
+  display: inline-flex;
+  color: var(--type-color, var(--ink));
+  cursor: pointer;
+}
+
+.type-filter-chip input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.type-filter-chip span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  min-width: 82px;
+  padding: 9px 12px;
+  border: 2px solid color-mix(in srgb, currentColor 48%, #0000);
+  border-radius: 999px;
+  background: #fff;
+  color: currentColor;
+  font: 800 12px/1 var(--utility);
+  transition:
+    background 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.type-filter-chip input:checked + span {
+  background: color-mix(in srgb, currentColor 18%, #fff);
+  box-shadow: 3px 3px 0 var(--ink);
+  transform: translate(-1px, -1px);
+}
+
+.type-filter-chip input:focus-visible + span {
+  outline: 3px solid var(--yellow);
+  outline-offset: 3px;
+}
+
+.gallery-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gallery-summary .result-count {
+  margin-bottom: 0;
+}
+
+.clear-filters {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 2px solid var(--ink);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--ink);
+  font: 800 12px/1 var(--utility);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.clear-filters:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: 3px;
 }
 
 .gallery-card {
   display: grid;
-  grid-template-rows: 140px auto auto;
+  grid-template-rows: 148px auto auto 1fr;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   padding: 16px;
   border: 2px solid var(--line);
   border-radius: 8px;
   background: #fff;
   color: var(--ink);
+  text-align: left;
   text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .gallery-card:hover {
   border-color: var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  transform: translate(-2px, -2px);
 }
 
 .gallery-card img {
   width: 100%;
-  height: 132px;
+  height: 140px;
   object-fit: contain;
 }
 
@@ -313,6 +420,11 @@ select {
 .gallery-card small {
   color: var(--muted);
   font: 800 12px/1 var(--utility);
+}
+
+.gallery-card .type-badges {
+  justify-content: flex-start;
+  align-self: end;
 }
 
 .detail-layout {
@@ -530,6 +642,11 @@ meter {
 
   .pokemon-card {
     min-height: 0;
+  }
+
+  .gallery-summary {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .detail-layout {

@@ -214,6 +214,36 @@ function PokemonListPage() {
 
 function PokemonGalleryPage() {
   const { pokemon, status, error } = usePokemonIndex()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const selectedTypes = getSelectedTypes(searchParams.get('types'))
+
+  const typeOptions = useMemo(() => getTypeOptions(pokemon), [pokemon])
+  const filteredPokemon = useMemo(
+    () => filterPokemonByTypes(pokemon, selectedTypes),
+    [pokemon, selectedTypes],
+  )
+
+  function updateSelectedType(type: PokemonTypeName) {
+    const nextTypes = selectedTypes.includes(type)
+      ? selectedTypes.filter((selectedType) => selectedType !== type)
+      : [...selectedTypes, type]
+    const nextParams = new URLSearchParams(searchParams)
+
+    if (nextTypes.length > 0) {
+      nextParams.set('types', nextTypes.join(','))
+    } else {
+      nextParams.delete('types')
+    }
+
+    setSearchParams(nextParams)
+  }
+
+  function clearSelectedTypes() {
+    const nextParams = new URLSearchParams(searchParams)
+
+    nextParams.delete('types')
+    setSearchParams(nextParams)
+  }
 
   return (
     <section className="browser-view" aria-labelledby="gallery-heading">
@@ -228,19 +258,65 @@ function PokemonGalleryPage() {
       </div>
 
       <PokemonState status={status} error={error}>
-        <div className="gallery-grid">
-          {pokemon.map((entry) => (
-            <Link
-              className="gallery-card"
-              key={entry.id}
-              to={routes.detail(entry.id)}
-            >
-              <PokemonArtwork pokemon={entry} />
-              <span>{entry.displayName}</span>
-              <small>#{entry.dexNumber}</small>
-            </Link>
-          ))}
+        <div className="gallery-controls">
+          <fieldset
+            className="type-filter-group"
+            aria-label="Filter gallery by type"
+          >
+            <legend>Types</legend>
+            <div className="type-filter-options">
+              {typeOptions.map((typeName) => (
+                <label
+                  className={`type-filter-chip type-${typeName}`}
+                  key={typeName}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedTypes.includes(typeName)}
+                    onChange={() => updateSelectedType(typeName)}
+                  />
+                  <span>{capitalize(typeName)}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <div className="gallery-summary">
+            <span className="result-count">
+              {filteredPokemon.length} of {pokemon.length}
+            </span>
+            {selectedTypes.length > 0 ? (
+              <button
+                className="clear-filters"
+                type="button"
+                onClick={clearSelectedTypes}
+              >
+                Clear filters
+              </button>
+            ) : null}
+          </div>
         </div>
+
+        {filteredPokemon.length > 0 ? (
+          <div className="gallery-grid">
+            {filteredPokemon.map((entry) => (
+              <Link
+                className="gallery-card"
+                key={entry.id}
+                to={routes.detail(entry.id)}
+              >
+                <PokemonArtwork pokemon={entry} />
+                <span>{entry.displayName}</span>
+                <small>#{entry.dexNumber}</small>
+                <TypeBadges types={entry.types} />
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <p className="state-message">
+            No Pokemon match the selected type filters.
+          </p>
+        )}
       </PokemonState>
     </section>
   )
@@ -463,6 +539,19 @@ function filterPokemon(pokemon: Pokemon[], query: string, type: string) {
   })
 }
 
+function filterPokemonByTypes(
+  pokemon: Pokemon[],
+  selectedTypes: PokemonTypeName[],
+) {
+  if (selectedTypes.length === 0) {
+    return pokemon
+  }
+
+  return pokemon.filter((entry) =>
+    selectedTypes.some((type) => entry.types.includes(type)),
+  )
+}
+
 function sortPokemon(
   pokemon: Pokemon[],
   sort: SortKey,
@@ -512,8 +601,41 @@ function getSortDirection(value: string | null): SortDirection {
   return value === 'desc' ? 'desc' : 'asc'
 }
 
+function getSelectedTypes(value: string | null) {
+  if (!value) {
+    return []
+  }
+
+  return value
+    .split(',')
+    .filter((type): type is PokemonTypeName => isPokemonTypeName(type))
+}
+
 function getTypeOptions(pokemon: Pokemon[]) {
   return Array.from(new Set(pokemon.flatMap(({ types }) => types))).sort()
+}
+
+function isPokemonTypeName(value: string): value is PokemonTypeName {
+  return (
+    value === 'normal' ||
+    value === 'fire' ||
+    value === 'water' ||
+    value === 'electric' ||
+    value === 'grass' ||
+    value === 'ice' ||
+    value === 'fighting' ||
+    value === 'poison' ||
+    value === 'ground' ||
+    value === 'flying' ||
+    value === 'psychic' ||
+    value === 'bug' ||
+    value === 'rock' ||
+    value === 'ghost' ||
+    value === 'dragon' ||
+    value === 'dark' ||
+    value === 'steel' ||
+    value === 'fairy'
+  )
 }
 
 function capitalize(value: string) {
