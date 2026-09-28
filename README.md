@@ -1,75 +1,78 @@
-# React + TypeScript + Vite
+# MP2 Pokemon Browser
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React + TypeScript single-page app for browsing the first 151 Pokemon from the
+[PokeAPI](https://pokeapi.co/). The app includes searchable list, gallery, and
+detail views for exploring Kanto Pokemon by name, Pokedex number, type, artwork,
+abilities, stats, height, and weight.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- List view for the first-generation Pokemon with live search by name, number,
+  or type.
+- Client-side type filtering plus sorting by Pokedex number, name, height, or
+  weight.
+- Ascending and descending sort controls for all list sort options.
+- Gallery view using official Pokemon artwork from the API.
+- Multi-select gallery filtering by Pokemon type.
+- Detail routes at `/pokemon/:pokemonId` with artwork, type badges, height,
+  weight, abilities, hidden ability, and base stat bars.
+- Previous and next controls on the detail view that cycle through Pokemon
+  `001` through `151`.
+- Loading, error, empty-results, and invalid-detail-route states.
 
-## React Compiler
+## Setup
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Install dependencies:
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Start the local development server:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm run dev
 ```
+
+Create a production build:
+
+```bash
+npm run build
+```
+
+Preview the production build locally:
+
+```bash
+npm run preview
+```
+
+Run lint checks:
+
+```bash
+npm run lint
+```
+
+## Deployment Notes
+
+- `vite.config.ts` sets the Vite `base` path to `/mp2/` for GitHub Pages.
+- `src/main.tsx` passes `import.meta.env.BASE_URL` to `BrowserRouter` as the
+  router basename, so app links resolve correctly under the deployed base path.
+
+## Sources
+
+Code and data source:
+
+- PokeAPI: https://pokeapi.co/
+
+Reading and tooling references:
+
+- React documentation: https://react.dev/
+- React Router documentation: https://reactrouter.com/
+- Axios package documentation: https://www.npmjs.com/package/axios
+- TypeScript documentation: https://www.typescriptlang.org/docs/
+- Vite documentation: https://vite.dev/
+
+
+LLM references:
+
+- LLM chat references used during implementation are declared in `llm_logs.csv`.
