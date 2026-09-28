@@ -18,5 +18,31 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
+    rules: {
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'fetch',
+          message: 'Use the shared Axios client from src/api/http.ts for API calls.',
+        },
+        {
+          name: 'XMLHttpRequest',
+          message: 'Use the shared Axios client from src/api/http.ts for API calls.',
+        },
+      ],
+      'no-restricted-properties': [
+        'error',
+        {
+          object: 'window',
+          property: 'fetch',
+          message: 'Use the shared Axios client from src/api/http.ts for API calls.',
+        },
+        {
+          object: 'globalThis',
+          property: 'fetch',
+          message: 'Use the shared Axios client from src/api/http.ts for API calls.',
+        },
+      ],
+    },
   },
 ])
