@@ -84,9 +84,10 @@ function App() {
   return (
     <main className="app-shell">
       <header className="app-header">
-        <div>
+        <div className="brand-lockup">
           <p className="eyebrow">Kanto index</p>
           <h1>Pokemon browser</h1>
+          <p className="header-meta">Field records 001-151</p>
         </div>
         <nav className="route-tabs" aria-label="Pokemon browser views">
           <NavLink to={routes.list} end>
@@ -245,11 +246,15 @@ function PokemonListPage() {
         <div className="result-count">
           {sortedPokemon.length} of {pokemon.length}
         </div>
-        <div className="pokemon-list">
-          {sortedPokemon.map((entry) => (
-            <PokemonListItem key={entry.id} pokemon={entry} />
-          ))}
-        </div>
+        {sortedPokemon.length > 0 ? (
+          <div className="pokemon-list">
+            {sortedPokemon.map((entry) => (
+              <PokemonListItem key={entry.id} pokemon={entry} />
+            ))}
+          </div>
+        ) : (
+          <EmptyState message="No Pokemon match the current list filters." />
+        )}
       </PokemonState>
     </section>
   )
@@ -356,9 +361,7 @@ function PokemonGalleryPage() {
             ))}
           </div>
         ) : (
-          <p className="state-message">
-            No Pokemon match the selected type filters.
-          </p>
+          <EmptyState message="No Pokemon match the selected type filters." />
         )}
       </PokemonState>
     </section>
@@ -516,20 +519,40 @@ function PokemonState({
   status: LoadStatus
 }) {
   if (status === 'loading') {
-    return <p className="state-message">Loading Pokemon from PokeAPI...</p>
+    return (
+      <div className="state-message state-loading" role="status">
+        <span className="state-kicker">Loading</span>
+        <p>Loading Pokemon from PokeAPI...</p>
+      </div>
+    )
   }
 
   if (status === 'error') {
-    return <p className="state-message error">{error}</p>
+    return (
+      <div className="state-message state-error" role="alert">
+        <span className="state-kicker">Error</span>
+        <p>{error}</p>
+      </div>
+    )
   }
 
   return children
 }
 
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="state-message state-empty">
+      <span className="state-kicker">Empty</span>
+      <p>{message}</p>
+    </div>
+  )
+}
+
 function NotFoundDetail({ pokemonId }: { pokemonId?: string }) {
   return (
-    <div className="state-message">
-      No first-generation Pokemon found for id {pokemonId ?? 'unknown'}.
+    <div className="state-message state-empty">
+      <span className="state-kicker">Not found</span>
+      <p>No first-generation Pokemon found for id {pokemonId ?? 'unknown'}.</p>
       <Link className="text-link" to={routes.list}>
         Return to the list
       </Link>

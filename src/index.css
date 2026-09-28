@@ -1,28 +1,29 @@
 :root {
-  --bg: #f7f4e8;
-  --panel: #fdfbf2;
-  --ink: #222326;
-  --muted: #64615a;
-  --line: #d8d0bb;
-  --red: #d93f3f;
-  --blue: #2d7dd2;
-  --yellow: #f7c948;
-  --display: 'Arial Black', Impact, system-ui, sans-serif;
+  --bg: #eef2ef;
+  --surface: #ffffff;
+  --surface-raised: #f8faf8;
+  --surface-muted: #f3f6f4;
+  --ink: #20262d;
+  --muted: #63707a;
+  --line: #d9e0db;
+  --line-strong: #aeb9b2;
+  --accent: #b43b35;
+  --blue: #256c9e;
+  --green: #2f805a;
+  --yellow: #d8a725;
+  --danger: #b33030;
+  --focus: #f0c84b;
+  --display: Inter, ui-sans-serif, system-ui, 'Segoe UI', sans-serif;
   --body: Inter, ui-sans-serif, system-ui, 'Segoe UI', sans-serif;
   --utility: 'Trebuchet MS', Inter, ui-sans-serif, system-ui, sans-serif;
 
-  font: 16px/1.5 var(--body);
+  font: 15px/1.5 var(--body);
   color: var(--muted);
   background:
-    radial-gradient(
-      circle at 24px 24px,
-      rgba(217, 63, 63, 0.16) 0 7px,
-      transparent 8px
-    ),
-    linear-gradient(90deg, rgba(34, 35, 38, 0.05) 1px, transparent 1px),
-    linear-gradient(rgba(34, 35, 38, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(32, 38, 45, 0.05) 1px, transparent 1px),
+    linear-gradient(rgba(32, 38, 45, 0.05) 1px, transparent 1px),
     var(--bg);
-  background-size: 96px 96px, 24px 24px, 24px 24px, auto;
+  background-size: 28px 28px, 28px 28px, auto;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -42,6 +43,15 @@ button,
 input,
 select {
   font: inherit;
+}
+
+button,
+select {
+  appearance: none;
+}
+
+button {
+  touch-action: manipulation;
 }
 
 img {
