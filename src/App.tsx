@@ -68,11 +68,17 @@ function PokemonListPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const query = searchParams.get('q') ?? ''
   const type = searchParams.get('type') ?? 'all'
+  const sort = getSortKey(searchParams.get('sort'))
+  const direction = getSortDirection(searchParams.get('direction'))
 
   const typeOptions = useMemo(() => getTypeOptions(pokemon), [pokemon])
   const filteredPokemon = useMemo(
     () => filterPokemon(pokemon, query, type),
     [pokemon, query, type],
+  )
+  const sortedPokemon = useMemo(
+    () => sortPokemon(filteredPokemon, sort, direction),
+    [filteredPokemon, sort, direction],
   )
 
   function updateSearch(nextQuery: string) {
@@ -94,6 +100,30 @@ function PokemonListPage() {
       nextParams.delete('type')
     } else {
       nextParams.set('type', nextType)
+    }
+
+    setSearchParams(nextParams)
+  }
+
+  function updateSort(nextSort: SortKey) {
+    const nextParams = new URLSearchParams(searchParams)
+
+    if (nextSort === 'number') {
+      nextParams.delete('sort')
+    } else {
+      nextParams.set('sort', nextSort)
+    }
+
+    setSearchParams(nextParams)
+  }
+
+  function updateDirection(nextDirection: SortDirection) {
+    const nextParams = new URLSearchParams(searchParams)
+
+    if (nextDirection === 'asc') {
+      nextParams.delete('direction')
+    } else {
+      nextParams.set('direction', nextDirection)
     }
 
     setSearchParams(nextParams)
@@ -132,15 +162,48 @@ function PokemonListPage() {
               ))}
             </select>
           </label>
+
+          <label className="select-field">
+            <span>Sort by</span>
+            <select
+              value={sort}
+              onChange={(event) => updateSort(event.target.value as SortKey)}
+            >
+              <option value="number">Number</option>
+              <option value="name">Name</option>
+              <option value="height">Height</option>
+              <option value="weight">Weight</option>
+            </select>
+          </label>
+
+          <fieldset className="sort-direction" aria-label="Sort direction">
+            <legend>Order</legend>
+            <button
+              type="button"
+              className={direction === 'asc' ? 'active' : undefined}
+              onClick={() => updateDirection('asc')}
+              aria-pressed={direction === 'asc'}
+            >
+              Asc
+            </button>
+            <button
+              type="button"
+              className={direction === 'desc' ? 'active' : undefined}
+              onClick={() => updateDirection('desc')}
+              aria-pressed={direction === 'desc'}
+            >
+              Desc
+            </button>
+          </fieldset>
         </div>
       </div>
 
       <PokemonState status={status} error={error}>
         <div className="result-count">
-          {filteredPokemon.length} of {pokemon.length}
+          {sortedPokemon.length} of {pokemon.length}
         </div>
         <div className="pokemon-list">
-          {filteredPokemon.map((entry) => (
+          {sortedPokemon.map((entry) => (
             <PokemonListItem key={entry.id} pokemon={entry} />
           ))}
         </div>
@@ -242,11 +305,23 @@ function PokemonDetailPage() {
 
 function PokemonListItem({ pokemon }: { pokemon: Pokemon }) {
   return (
-    <Link className="pokemon-row" to={routes.detail(pokemon.id)}>
+    <Link className="pokemon-card" to={routes.detail(pokemon.id)}>
       <PokemonArtwork pokemon={pokemon} />
       <span className="dex-number">#{pokemon.dexNumber}</span>
-      <strong>{pokemon.displayName}</strong>
-      <TypeBadges types={pokemon.types} />
+      <div className="pokemon-card-main">
+        <strong>{pokemon.displayName}</strong>
+        <TypeBadges types={pokemon.types} />
+      </div>
+      <dl className="pokemon-card-facts">
+        <div>
+          <dt>Height</dt>
+          <dd>{pokemon.heightMeters} m</dd>
+        </div>
+        <div>
+          <dt>Weight</dt>
+          <dd>{pokemon.weightKilograms} kg</dd>
+        </div>
+      </dl>
     </Link>
   )
 }
@@ -328,6 +403,8 @@ function NotFoundDetail({ pokemonId }: { pokemonId?: string }) {
 }
 
 type LoadStatus = 'loading' | 'loaded' | 'error'
+type SortKey = 'number' | 'name' | 'height' | 'weight'
+type SortDirection = 'asc' | 'desc'
 
 function usePokemonIndex() {
   const [pokemon, setPokemon] = useState<Pokemon[]>(pokemonCache ?? [])
@@ -384,6 +461,55 @@ function filterPokemon(pokemon: Pokemon[], query: string, type: string) {
 
     return matchesType && matchesQuery
   })
+}
+
+function sortPokemon(
+  pokemon: Pokemon[],
+  sort: SortKey,
+  direction: SortDirection,
+) {
+  const multiplier = direction === 'asc' ? 1 : -1
+
+  return [...pokemon].sort((first, second) => {
+    const comparison = comparePokemon(first, second, sort)
+
+    if (comparison !== 0) {
+      return comparison * multiplier
+    }
+
+    return first.id - second.id
+  })
+}
+
+function comparePokemon(first: Pokemon, second: Pokemon, sort: SortKey) {
+  switch (sort) {
+    case 'name':
+      return first.displayName.localeCompare(second.displayName)
+    case 'height':
+      return first.heightMeters - second.heightMeters
+    case 'weight':
+      return first.weightKilograms - second.weightKilograms
+    case 'number':
+    default:
+      return first.id - second.id
+  }
+}
+
+function getSortKey(value: string | null): SortKey {
+  if (
+    value === 'name' ||
+    value === 'height' ||
+    value === 'weight' ||
+    value === 'number'
+  ) {
+    return value
+  }
+
+  return 'number'
+}
+
+function getSortDirection(value: string | null): SortDirection {
+  return value === 'desc' ? 'desc' : 'asc'
 }
 
 function getTypeOptions(pokemon: Pokemon[]) {
